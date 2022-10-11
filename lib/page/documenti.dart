@@ -21,7 +21,8 @@ bool isLoading = false;
 class DocumentiPage extends StatefulWidget {
   static const String id = '/DocumentiPage';
 
-  DocumentiPage({required this.date});
+  DocumentiPage({required this.date, required this.agente});
+  final String? agente;
 
   final String date;
 
@@ -89,6 +90,7 @@ class _DocumentiPageState extends State<DocumentiPage>
             context,
             MaterialPageRoute(
                 builder: (context) => DocumentiPage(
+                      agente: widget.agente.toString(),
                       date: DateFormat('dd-MM-yyyy').format(picked).toString(),
                     )));
       });
@@ -112,7 +114,8 @@ class _DocumentiPageState extends State<DocumentiPage>
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HomePage(),
+                      builder: (context) =>
+                          HomePage(agente: widget.agente.toString()),
                     ));
               }
             },
@@ -243,6 +246,9 @@ class _DocumentiPageState extends State<DocumentiPage>
                                                       .push(MaterialPageRoute(
                                                     builder: (context) =>
                                                         DocuPage(
+                                                            agente: widget
+                                                                .agente
+                                                                .toString(),
                                                             id_dotes: element[
                                                                     "id_dotes"]
                                                                 .toString()),
@@ -278,6 +284,9 @@ class _DocumentiPageState extends State<DocumentiPage>
                                                         .push(MaterialPageRoute(
                                                       builder: (context) =>
                                                           DocuPage(
+                                                              agente: widget
+                                                                  .agente
+                                                                  .toString(),
                                                               id_dotes: element[
                                                                   "id_dotes"]),
                                                     ));
@@ -307,6 +316,9 @@ class _DocumentiPageState extends State<DocumentiPage>
                                                       .push(MaterialPageRoute(
                                                     builder: (context) =>
                                                         DocuPage(
+                                                            agente: widget
+                                                                .agente
+                                                                .toString(),
                                                             id_dotes: element[
                                                                     "id_dotes"]
                                                                 .toString()),
@@ -342,6 +354,9 @@ class _DocumentiPageState extends State<DocumentiPage>
                                                         .push(MaterialPageRoute(
                                                       builder: (context) =>
                                                           DocuPage(
+                                                              agente: widget
+                                                                  .agente
+                                                                  .toString(),
                                                               id_dotes: element[
                                                                   "id_dotes"]),
                                                     ));

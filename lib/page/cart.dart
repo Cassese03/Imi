@@ -19,7 +19,8 @@ import '../db/databases.dart';
 class CartPage extends StatefulWidget {
   static const String id = '/CartPage';
 
-  const CartPage({this.cd_cf});
+  const CartPage({this.cd_cf, required this.agente});
+  final String? agente;
   final String? cd_cf;
 
   @override
@@ -70,10 +71,12 @@ class _CartPageState extends State<CartPage> {
 
     if (widget.cd_cf == null)
       cart = await d1b.rawQuery(
-          'SELECT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato != \'send\'');
+          'SELECT DISTINCT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato != \'send\'');
     else
       cart = await d1b.rawQuery(
-          'SELECT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.cd_cf = \'${widget.cd_cf}\' and cart.stato != \'send\'');
+          'SELECT DISTINCT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.cd_cf = \'${widget.cd_cf}\' and cart.stato != \'send\'');
+
+    print(cart);
 
     setState(() {
       isLoading = false;
@@ -114,7 +117,8 @@ class _CartPageState extends State<CartPage> {
                   ),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => HomePage(),
+                      builder: (context) =>
+                          HomePage(agente: widget.agente.toString()),
                     ));
                   },
                 ),
@@ -533,9 +537,10 @@ class _CartPageState extends State<CartPage> {
                                                                     context)
                                                                 .push(
                                                                     (MaterialPageRoute(
-                                                              builder:
-                                                                  (context) =>
-                                                                      HomePage(),
+                                                              builder: (context) =>
+                                                                  HomePage(
+                                                                      agente: widget
+                                                                          .agente),
                                                             )));
                                                           },
                                                           child: Container(
@@ -725,10 +730,10 @@ class _MainCartPageCartCardState extends State<MainCartPageCartCard> {
 
     if (widget.cd_cf == null)
       cart = await d1b.rawQuery(
-          'SELECT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato != \'send\'');
+          'SELECT DISTINCT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato != \'send\'');
     else
       cart = await d1b.rawQuery(
-          'SELECT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.cd_cf = \'${widget.cd_cf}\' and cart.stato != \'send\'');
+          'SELECT DISTINCT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.cd_cf = \'${widget.cd_cf}\' and cart.stato != \'send\'');
 
     setState(() {
       isLoading = false;

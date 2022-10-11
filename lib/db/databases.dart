@@ -242,14 +242,14 @@ class ProvDatabase {
 
 // Inizio Agente
 
-  Future addAgente(
-      String cd_agente, String descrizione, String xpassword) async {
+  Future addAgente(String id_ditta, String cd_agente, String descrizione,
+      String provvigione, String sconto, String xpassword) async {
     final agente = Agente(
         id_ditta: '8',
         cd_agente: cd_agente,
         descrizione: descrizione,
-        provvigione: 0.00,
-        sconto: 0.00,
+        provvigione: provvigione,
+        sconto: sconto,
         xpassword: xpassword);
 
     await ProvDatabase.instance.createagente(agente);
@@ -888,10 +888,12 @@ class ProvDatabase {
     await ProvDatabase.instance.createCF(cf_end);
   }
 
-  Future<List<CF>> readAllCF() async {
+  Future<List<CF>> readAllCF(String agente) async {
     final db = await instance.database;
 
-    final result = await db.query('cf');
+    final result = await db.query('cf',
+        where: 'cd_agente_1 = ? or cd_agente_2 = ? ',
+        whereArgs: [agente, agente]);
 
     return result.map((json) => CF.fromJson(json)).toList();
   }

@@ -25,10 +25,11 @@ String cd_cf = '';
 
 class DocuPage extends StatefulWidget {
   // ignore: use_key_in_widget_constructors
-  const DocuPage({required this.id_dotes
+  const DocuPage({required this.id_dotes, required this.agente
       //required this.Testa,
       });
   final String id_dotes;
+  final String? agente;
 
   @override
   State<DocuPage> createState() => _DocuPageState();
@@ -368,7 +369,7 @@ class _MainTestaPageTestaCardState extends State<MainTestaPageTestaCard> {
             alignment: Alignment.bottomCenter,
             children: [
               SizedBox(
-                height: 180,
+                height: 100,
                 width: double.infinity,
               ),
               Column(
@@ -442,36 +443,6 @@ class _MainTestaPageTestaCardState extends State<MainTestaPageTestaCard> {
                               .maxLines(2)
                               .softWrap(false)
                               .make(),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: 'Documento Collegato :'
-                                .text
-                                .size(16)
-                                .semiBold
-                                .maxLines(2)
-                                .softWrap(false)
-                                .make(),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DocuPage(
-                                            id_dotes: Testa[0]["id_dotes"],
-                                          )));
-                            },
-                            child: 'Nessuno'
-                                .text
-                                .size(8)
-                                .semiBold
-                                .maxLines(2)
-                                .softWrap(false)
-                                .make(),
-                          ),
                         ],
                       ),
                       SizedBox(

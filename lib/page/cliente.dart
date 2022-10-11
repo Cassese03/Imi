@@ -22,11 +22,9 @@ String cd_cf = '';
 class ClientePage extends StatefulWidget {
   static const String id = '/ClientePage';
   // ignore: use_key_in_widget_constructors
-  const ClientePage({required this.cd_cf
-      //required this.Cliente,
-      });
+  const ClientePage({required this.cd_cf, required this.agente});
   final String cd_cf;
-
+  final String? agente;
   @override
   State<ClientePage> createState() => _ClientePageState();
 }
@@ -42,7 +40,7 @@ class _ClientePageState extends State<ClientePage>
   @override
   void initState() {
     super.initState();
-
+    print(widget.agente.toString());
     refreshCF();
     //_prezzototale();
     if (mounted) {

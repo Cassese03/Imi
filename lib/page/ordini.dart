@@ -6,6 +6,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:imi/page/sincronizza.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:imi/model/cart.dart';
 import 'package:imi/page/dettaglio.dart';
@@ -17,8 +18,8 @@ import 'package:flutter/material.dart';
 import '../db/databases.dart';
 
 class OrdiniPage extends StatefulWidget {
-  static const String id = '/OrdiniPage';
-
+  OrdiniPage({required this.agente});
+  String? agente;
   @override
   State<OrdiniPage> createState() => _OrdiniPageState();
 }
@@ -32,7 +33,7 @@ class _OrdiniPageState extends State<OrdiniPage> {
   @override
   void initState() {
     super.initState();
-
+    print(widget.agente.toString());
     refreshCart();
 
     //_prezzototale();
@@ -58,27 +59,6 @@ class _OrdiniPageState extends State<OrdiniPage> {
     }
   }*/
   Future<http.Response> sendCart(cart) async {
-    /* String ciao = jsonEncode(<String, String>{
-      'cd_ar': cart.cd_ar.toString(),
-      'id_ditta': '7',
-      'cd_cf': cart.cd_cf.toString(),
-      'cd_cfsede': cart.cd_cfsede.toString(),
-      'cd_cfdest': cart.cd_cfdest.toString(),
-      'cd_agente_1': cart.cd_agente_1.toString(),
-      'qta': '${cart.qta}',
-      // 'xcolli': cart.xcolli.toString(),
-      // 'xbancali': cart.xbancali.toString(),
-      // 'prezzo_unitario': cart.prezzo_unitario.toString(),
-      'cd_aliquota': cart.cd_aliquota.toString(),
-      //'aliquota': cart.aliquota.toString(),
-      //'totale': cart.totale.toString(),
-      //'imposta': cart.imposta.toString(),
-      //'da_inviare': cart.da_inviare.toString(),
-      'note': cart.note.toString(),
-      //'scontoriga': cart.sconto_riga.toString(),
-    });
-    print(ciao);*/
-
     final response = await http.post(
       Uri.parse('https://bohagent.cloud/api/b2b/set_imi_cart/IMI1234'),
       headers: <String, String>{
@@ -90,7 +70,7 @@ class _OrdiniPageState extends State<OrdiniPage> {
         'cd_cf': cart.cd_cf.toString(),
         //'cd_cfsede': cart.cd_cfsede.toString(),
         //'cd_cfdest': cart.cd_cfdest.toString(),
-        //'cd_agente_1': cart.cd_agente_1.toString(),
+        'cd_agente_1': cart.cd_agente_1.toString(),
         'qta': '${cart.qta}',
         'xcolli': '0',
         'xbancali': '0',
@@ -124,7 +104,7 @@ class _OrdiniPageState extends State<OrdiniPage> {
 
     final d1b = await ProvDatabase.instance.database;
     cart = await d1b.rawQuery(
-        'SELECT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato == \'send\'');
+        'SELECT DISTINCT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato == \'send\'');
     setState(() {
       isLoading = false;
     });
@@ -164,7 +144,8 @@ class _OrdiniPageState extends State<OrdiniPage> {
                   ),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => HomePage(),
+                      builder: (context) =>
+                          HomePage(agente: widget.agente.toString()),
                     ));
                   },
                 ),
@@ -283,114 +264,120 @@ class _OrdiniPageState extends State<OrdiniPage> {
                                             for (int i = 0;
                                                 i < value.length;
                                                 i++) {
-                                              await sendCart(value[i]);
-
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    content: Container(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width /
-                                                              1.3,
-                                                      height:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height /
-                                                              4,
-                                                      decoration:
-                                                          new BoxDecoration(
-                                                        shape:
-                                                            BoxShape.rectangle,
-                                                        color: const Color(
-                                                            0xFFFFFF),
-                                                        borderRadius:
-                                                            new BorderRadius
-                                                                .all(new Radius
-                                                                    .circular(
-                                                                32.0)),
-                                                      ),
-                                                      // ignore: unnecessary_new
-                                                      child: new Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: <Widget>[
-                                                          Icon(
-                                                            Icons.verified,
-                                                            color: Colors.green,
-                                                            size: 32,
-                                                          ),
-                                                          Text('Complimenti!'),
-                                                          Text(
-                                                            'Tutte le righe sono state sincronizzate!',
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                          MaterialButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                                refreshCart();
-                                                              },
-                                                              child: Container(
-                                                                width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width,
-                                                                height: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .height /
-                                                                    12,
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .all(
-                                                                            15.0),
-                                                                child: Material(
-                                                                    color: Colors
-                                                                        .green,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            25.0),
-                                                                    child:
-                                                                        Column(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      children: <
-                                                                          Widget>[
-                                                                        Text(
-                                                                          'Ok',
-                                                                          style:
-                                                                              TextStyle(
-                                                                            color:
-                                                                                Colors.white,
-                                                                            fontSize:
-                                                                                18.0,
-                                                                            fontFamily:
-                                                                                'helvetica_neue_light',
-                                                                          ),
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                        ),
-                                                                      ],
-                                                                    )),
-                                                              )),
-                                                        ],
-                                                      ),
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        SincronizzaPage(
+                                                      agente: widget.agente
+                                                          .toString(),
+                                                      cart: [value[i]],
                                                     ),
-                                                  );
-                                                },
-                                              );
-                                              print(
-                                                  'Inserito correttamente riga $i');
+                                                  ));
                                             }
+
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  content: Container(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width /
+                                                            1.3,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            4,
+                                                    decoration:
+                                                        new BoxDecoration(
+                                                      shape: BoxShape.rectangle,
+                                                      color:
+                                                          const Color(0xFFFFFF),
+                                                      borderRadius:
+                                                          new BorderRadius.all(
+                                                              new Radius
+                                                                      .circular(
+                                                                  32.0)),
+                                                    ),
+                                                    // ignore: unnecessary_new
+                                                    child: new Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: <Widget>[
+                                                        Icon(
+                                                          Icons.verified,
+                                                          color: Colors.green,
+                                                          size: 32,
+                                                        ),
+                                                        Text('Complimenti!'),
+                                                        Text(
+                                                          'Tutte le righe sono state sincronizzate!',
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                        MaterialButton(
+                                                            onPressed:
+                                                                () async {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              refreshCart();
+                                                            },
+                                                            child: Container(
+                                                              width:
+                                                                  MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width,
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height /
+                                                                  12,
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(
+                                                                          15.0),
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .green,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              25.0),
+                                                                  child: Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: <
+                                                                        Widget>[
+                                                                      Text(
+                                                                        'Ok',
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color:
+                                                                              Colors.white,
+                                                                          fontSize:
+                                                                              18.0,
+                                                                          fontFamily:
+                                                                              'helvetica_neue_light',
+                                                                        ),
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                      ),
+                                                                    ],
+                                                                  )),
+                                                            )),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            );
                                           } else {
                                             showDialog(
                                               context: context,
@@ -697,7 +684,7 @@ class _MainOrdiniPageCartCardState extends State<MainOrdiniPageCartCard> {
 
     final d1b = await ProvDatabase.instance.database;
     cart = await d1b.rawQuery(
-        'SELECT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato == \'send\'');
+        'SELECT DISTINCT cart.*, ar.immagine from cart left join ar on cart.cd_ar = ar.cd_ar WHERE cart.stato == \'send\'');
 
     setState(() {
       isLoading = false;

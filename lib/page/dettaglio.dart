@@ -21,12 +21,13 @@ class ProductPage extends StatefulWidget {
 
   final String image;
   // ignore: use_key_in_widget_constructors
-  const ProductPage({required this.image, required this.prod, this.cd_cf
+  const ProductPage(
+      {required this.image, required this.prod, this.cd_cf, required this.agente
       //required this.product,
       });
   final int prod;
   final String? cd_cf;
-
+  final String? agente;
   @override
   State<ProductPage> createState() => _ProductPageState();
 }
@@ -71,22 +72,8 @@ class _ProductPageState extends State<ProductPage> {
         'SELECT * FROM dorig WHERE id_ditta = \'8\' AND cd_cf = \'${widget.cd_cf}\' AND cd_ar = \'${cd_ar1}\' order by id DESC LIMIT 1');
 
     if (check.isEmpty) {
-      /*
       check = await d1b.rawQuery(
-          "SELECT * FROM dorig WHERE id_ditta = '7' AND cd_cf like 'C%' AND cd_ar = '${cd_ar1}' order by id DESC LIMIT 1");
-      List forn = await d1b.query("cf",
-          where: "id_ditta = '7' AND cd_cf like ?", whereArgs: ['C%']);
-
-      print(forn.length);*/
-
-      /*check = await d1b.query("dorig",
-          where: "id_ditta = '7' AND cd_ar = ?",
-          whereArgs: ['${cd_ar1}'],
-          orderBy: "id Desc",
-          limit: 1);*/
-
-      check = await d1b.rawQuery(
-          "SELECT * FROM dorig WHERE id_ditta = '7' AND cd_cf like 'C%' AND cd_ar = '${cd_ar1}'  order by id DESC LIMIT 1");
+          "SELECT * FROM dorig WHERE cd_cf like 'C%' AND cd_ar = '${cd_ar1}'  order by id DESC LIMIT 1");
     }
 
     if (check.isEmpty) {
@@ -170,7 +157,9 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => CartPage(cd_cf: widget.cd_cf),
+                      builder: (context) => CartPage(
+                          agente: widget.agente.toString(),
+                          cd_cf: widget.cd_cf),
                     ));
                   },
                 ),
@@ -488,7 +477,7 @@ class _ProductPageState extends State<ProductPage> {
                                                 _quantita.toString(),
                                                 "null".toString(),
                                                 "null".toString(),
-                                                "null".toString(),
+                                                widget.agente.toString(),
                                                 "null".toString(),
                                                 "null".toString(),
                                                 prezzo.toString(),
@@ -706,9 +695,10 @@ class _ProductPageState extends State<ProductPage> {
                                                                 Navigator.push(
                                                                     context,
                                                                     MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              HomePage(),
+                                                                      builder: (context) => HomePage(
+                                                                          agente: widget
+                                                                              .agente
+                                                                              .toString()),
                                                                     ));
                                                               },
                                                               child: Container(

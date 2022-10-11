@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:imi/page/Home.dart';
+import 'package:imi/page/login.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +28,6 @@ class MyApp extends StatelessWidget {
             elevation: 0,
           ),
         ),
-        home: HomePage(),
+        home: LoginPage(),
       );
 }
