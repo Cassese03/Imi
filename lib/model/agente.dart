@@ -25,8 +25,8 @@ class Agente {
   final String id_ditta;
   final String cd_agente;
   final String descrizione;
-  final double provvigione;
-  final double sconto;
+  final String provvigione;
+  final String sconto;
   final String xpassword;
 
   const Agente(
@@ -40,12 +40,12 @@ class Agente {
 
   static Agente fromJson(Map<String, Object?> json) => Agente(
       id: json[AgenteField.id] as int?,
-      id_ditta: json[AgenteField.id_ditta] as String,
-      cd_agente: json[AgenteField.cd_agente] as String,
-      descrizione: json[AgenteField.descrizione] as String,
-      provvigione: json[AgenteField.provvigione] as double,
-      sconto: json[AgenteField.sconto] as double,
-      xpassword: json[AgenteField.xpassword] as String);
+      id_ditta: json[AgenteField.id_ditta].toString(),
+      cd_agente: json[AgenteField.cd_agente].toString(),
+      descrizione: json[AgenteField.descrizione].toString(),
+      provvigione: json[AgenteField.provvigione].toString(),
+      sconto: json[AgenteField.sconto].toString(),
+      xpassword: json[AgenteField.xpassword].toString());
 
   Map<String, Object?> toJson() => {
         AgenteField.id: id,
@@ -62,8 +62,8 @@ class Agente {
     String? id_ditta,
     String? cd_agente,
     String? descrizione,
-    double? provvigione,
-    double? sconto,
+    String? provvigione,
+    String? sconto,
     String? xpassword,
   }) =>
       Agente(

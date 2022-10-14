@@ -428,7 +428,11 @@ class _ProductPageState extends State<ProductPage> {
                                             size: 22,
                                           )),
                                     ),
-                                    const Text('QUANTITA\''),
+                                    TextButton(
+                                        child: Text('QUANTITA\''),
+                                        onPressed: () {
+                                          print('ciao');
+                                        }),
                                   ],
                                 ),
                                 6.heightBox,

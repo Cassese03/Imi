@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/services.dart';
+import 'package:imi/model/sc.dart';
 import 'package:path/path.dart';
 import 'package:imi/model/agente.dart';
 import 'package:imi/model/imi.dart';
@@ -140,8 +141,58 @@ class ProvDatabase {
         '''CREATE TABLE IF NOT EXISTS mggiac (id $idType,id_ditta,cd_ar,cd_mg,giacenza,disponibile)
     ''');
     await db.execute(
+        '''CREATE TABLE IF NOT EXISTS sc (id $idType,id_ditta,cd_cf,datascadenza,importoe,numfattura,datafattura,datapagamento,pagata,insoluta)
+    ''');
+    await db.execute(
         '''CREATE TABLE IF NOT EXISTS dotes_prov (id $idType,id_ditta,id_dotes,xcd_xveicolo,xautista,ximb,xacconto,xsettimana,xtipoveicolo,xmodifica,xurgente,xpagata,xriford,xriffatra ,ximpfat,ximppag,xpagatat,xclidest)
     ''');
+  }
+
+  Future<SC> createSC(SC sc) async {
+    final db = await instance.database;
+    final id = await db.insert('sc', sc.toJson());
+
+    // final json = note.toJson();
+    // final columns =
+    // '${NoteFields.title}, ${NoteFields.description}, ${NoteFields.time}';
+    // final values =
+    // '${json[NoteFields.title]}, ${json[NoteFields.description]}, ${json [NoteFiel
+    // final id = await db
+    // .rawInsert('INSERT INTO table_name ($columns) VALUES ($values)');
+    return sc.copy(id: id);
+  }
+
+  Future addSC(
+      String id_ditta,
+      String cd_cf,
+      String datascadenza,
+      String importoe,
+      String numfattura,
+      String datafattura,
+      String datapagamento,
+      String pagata,
+      String insoluta,
+      ) async {
+    final sc = SC(
+        id_ditta: '7',
+        cd_cf: cd_cf,
+        datafattura: datafattura,
+        importoe: importoe,
+        datapagamento: datapagamento,
+        datascadenza: datascadenza,
+        insoluta: insoluta,
+        numfattura: numfattura,
+        pagata: pagata);
+
+    await ProvDatabase.instance.createSC(sc);
+  }
+
+  Future<int> deleteallSC() async {
+    final db = await instance.database;
+
+    return await db.delete(
+      'sc',
+    );
   }
 
   Future<int> update(imi imi) async {

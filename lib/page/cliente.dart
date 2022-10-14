@@ -6,6 +6,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:imi/page/dettaglio_docu.dart';
 import 'package:imi/page/home.dart';
 import 'package:imi/page/table.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -33,6 +34,8 @@ class _ClientePageState extends State<ClientePage>
     with SingleTickerProviderStateMixin {
   int _quantity = 1;
   late List cliente = [];
+  List doc = [];
+  List sc = [];
   bool isLoading = true;
   late Timer timer;
   late TabController _tabController;
@@ -40,14 +43,12 @@ class _ClientePageState extends State<ClientePage>
   @override
   void initState() {
     super.initState();
-    print(widget.agente.toString());
     refreshCF();
-    //_prezzototale();
     if (mounted) {
       timer = Timer.periodic(
           const Duration(seconds: 1), (Timer t) => _prezzototale());
     }
-    _tabController = TabController(vsync: this, length: 3);
+    _tabController = TabController(vsync: this, length: 2);
   }
 
   Future _prezzototale() async {
@@ -70,14 +71,18 @@ class _ClientePageState extends State<ClientePage>
       isLoading = true;
     });
 
-    //prezzototale = (_quantity.toDouble() * double.parse(prezzo)).toString();
-
     final d1b = await ProvDatabase.instance.database;
     var id = widget.cd_cf;
 
+    doc = await d1b.rawQuery(
+        'SELECT *, (SELECT descrizione from cf where cd_cf = d.cd_cf ) as descrizione from dotes d where d.cd_cf  = \'$id\'');
+
+    sc = await d1b.rawQuery(
+        'SELECT * from sc s where s.cd_cf  = \'$id\'');
+    print(sc);
+
     cliente = await d1b.rawQuery(
-        'SELECT * from cf where id_ditta = \'8\' and cd_cf  = \'$id\'');
-    cd_cf = cliente[0]["cd_cf"];
+        'SELECT * from cf where cd_cf  = \'$id\'');
 
     setState(() {
       isLoading = false;
@@ -103,7 +108,7 @@ class _ClientePageState extends State<ClientePage>
               ),
               centerTitle: true,
               title: Text(
-                cliente[0]["descrizione"],
+                cliente.isNotEmpty ? cliente[0]["descrizione"]:'',
                 style: const TextStyle(fontSize: 24),
                 textAlign: TextAlign.center,
               ),
@@ -111,7 +116,7 @@ class _ClientePageState extends State<ClientePage>
               actions: [
                 /*
                 GestureDetector(
-                    
+
                   child: Icon(
                     Icons.shopping_bag,
                     color: Colors.white,
@@ -165,7 +170,7 @@ class _ClientePageState extends State<ClientePage>
             body: isLoading
                 ? const CircularProgressIndicator()
                 : DefaultTabController(
-                    length: 3,
+                    length:2,
                     child: Container(
                       decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -179,7 +184,7 @@ class _ClientePageState extends State<ClientePage>
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             MainClientePageClienteCard(
-                              cd_cf: cliente[0]['cd_cf'],
+                              cd_cf: widget.cd_cf,
                             ).px(24),
                             16.heightBox,
                             Container(
@@ -195,10 +200,7 @@ class _ClientePageState extends State<ClientePage>
                                       icon: Icon(
                                           Icons.document_scanner_outlined,
                                           color: Colors.lightBlue)),
-                                  Tab(
-                                      icon: Icon(Icons.abc,
-                                          color: Colors.lightBlue)),
-                                ],
+                                  ],
                               ),
                             ),
                             Container(
@@ -207,15 +209,192 @@ class _ClientePageState extends State<ClientePage>
                               child: TabBarView(
                                 controller: _tabController,
                                 children: [
-                                  Tab(
-                                    text: 'NESSUNA SCADENZA INSERITA.',
-                                  ),
-                                  Tab(
-                                    text: 'NESSUN DOCUMENTO INSERITO.',
-                                  ),
-                                  Tab(
-                                    text: 'NESSUN DATO SPECIFICO INSERITO.',
-                                  ),
+                              sc.isEmpty
+                              ? Tab(text: 'NESSUNA SCADENZA INSERITA.')
+                                    : Tab(child: Container(
+                                width: MediaQuery.of(context)
+                                    .size
+                                    .width,
+                                height: MediaQuery.of(context)
+                                    .size
+                                    .height,
+                                child: ListView(
+                                  children: [
+                                    for (var element in sc)
+                                      ListTile(
+                                        onTap: () {/*
+
+                                          Navigator.of(context)
+                                              .push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DocuPage(
+                                                        agente: widget.agente,
+                                                        id_dotes: element[
+                                                        "id_dotes"]
+                                                            .toString()),
+                                              ));*/
+                                        },
+                                        leading: Icon(
+                                            Icons.feed_outlined),
+                                        title: Column(
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontSize: 14.0,
+                                                  color: Colors.black,
+                                                ),
+                                                children: <TextSpan>[
+
+
+                                                  TextSpan(
+                                                      text:
+                                                      ' N° '),
+                                                  TextSpan(
+                                                      text:
+                                                      '${element["numfattura"]}',
+                                                      style: const TextStyle(
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold)),
+
+                                                ],
+                                              ),
+                                            ),
+                                            RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontSize: 14.0,
+                                                  color: Colors.black,
+                                                ),
+                                                children: <TextSpan>[
+                                                  TextSpan(
+                                                      text:
+                                                      'Importo :'),
+                                                  TextSpan(
+                                                      text:  '${element["importoe"]}',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold, color: ((element["pagata"] as String) == "0")  ? Colors.red : Colors.blue)
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontSize: 14.0,
+                                                  color: Colors.black,
+                                                ),
+                                                children: <TextSpan>[
+
+
+                                                  TextSpan(
+                                                      text:
+                                                      'Scade il '),
+                                                  TextSpan(text: '${element["datascadenza"].substring(0, element["datascadenza"].indexOf("00:")).toString()}',style: const TextStyle(
+                                                      fontWeight:
+                                                      FontWeight
+                                                          .bold)),
+
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                          icon: Icon(
+                                              Icons.info_outline),
+                                          onPressed: () {/*
+
+                                            Navigator.of(context)
+                                                .push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DocuPage(
+                                                          agente: widget.agente,
+                                                          id_dotes: element[
+                                                          "id_dotes"]),
+                                                ));*/
+                                          },
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),),
+                                  doc.isEmpty
+                                      ? Tab(text: 'NESSUN DOCUMENTO INSERITO.')
+                                      : Tab(
+                                    child: Container(
+                                      width: MediaQuery.of(context)
+                                          .size
+                                          .width,
+                                      height: MediaQuery.of(context)
+                                          .size
+                                          .height,
+                                      child: ListView(
+                                        children: [
+                                          for (var element in doc)
+                                            ListTile(
+                                              onTap: () {
+
+                                                Navigator.of(context)
+                                                    .push(
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DocuPage(
+                                                              agente: widget.agente,
+                                                              id_dotes: element[
+                                                              "id_dotes"]
+                                                                  .toString()),
+                                                    ));
+                                              },
+                                              leading: Icon(
+                                                  Icons.feed_outlined),
+                                              title: RichText(
+                                                text: TextSpan(
+                                                  style: const TextStyle(
+                                                    fontSize: 14.0,
+                                                    color: Colors.black,
+                                                  ),
+                                                  children: <TextSpan>[
+                                                    TextSpan(
+                                                        text:
+                                                        '${element["cd_do"]} ',
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .bold)),
+                                                    TextSpan(
+                                                        text:
+                                                        ' N° ${element["numerodoc"]} - ${element["descrizione"]}'),
+                                                  ],
+                                                ),
+                                              ),
+                                              trailing: IconButton(
+                                                icon: Icon(
+                                                    Icons.info_outline),
+                                                onPressed: () {
+
+                                                  Navigator.of(context)
+                                                      .push(
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            DocuPage(
+                                                                agente: widget.agente,
+                                                                id_dotes: element[
+                                                                "id_dotes"]),
+                                                      ));
+                                                },
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                        ),
                                 ],
                               ),
                             ),
@@ -321,7 +500,7 @@ class _MainClientePageClienteCardState
     final d1b = await ProvDatabase.instance.database;
     var id = widget.cd_cf;
     cliente = await d1b.rawQuery(
-        'SELECT * from cf where id_ditta = \'8\' and cd_cf  = \'$id\'');
+        'SELECT * from cf where  cd_cf  = \'$id\'');
 
     //print(articolo);
 
@@ -350,7 +529,8 @@ class _MainClientePageClienteCardState
                       SizedBox(
                         height: 15,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                      ?Row(
                         children: [
                           Expanded(
                             child: 'Codice Fornitore :'
@@ -369,11 +549,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Indirizzo :'
@@ -392,11 +573,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Localita :'
@@ -415,11 +597,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Cap :'
@@ -438,11 +621,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Email :'
@@ -461,11 +645,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Agente 1 :'
@@ -484,11 +669,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Agente 2 :'
@@ -507,11 +693,12 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                       SizedBox(
                         height: 5,
                       ),
-                      Row(
+                      cliente.isNotEmpty
+                          ?Row(
                         children: [
                           Expanded(
                             child: 'Descrizione :'
@@ -530,7 +717,7 @@ class _MainClientePageClienteCardState
                               .softWrap(false)
                               .make(),
                         ],
-                      ),
+                      ):Text(''),
                     ],
                   )
                 ],

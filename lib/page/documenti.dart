@@ -62,7 +62,7 @@ class _DocumentiPageState extends State<DocumentiPage>
     String id = trans.substring(0, 19);
 
     ovc = await d1b.rawQuery(
-        'SELECT *, (SELECT descrizione from cf where cd_cf = d.cd_cf ) as descrizione from dotes d where d.id_ditta = \'8\' and d.datadoc  = \'$id\' and d.cd_do = \'OVC\' ');
+        'SELECT *, (SELECT descrizione from cf where cd_cf = d.cd_cf ) as descrizione from dotes d where d.datadoc  = \'$id\' and d.cd_do = \'OVC\' ');
 
     ove = await d1b.rawQuery(
         'SELECT *, (SELECT descrizione from cf where cd_cf = d.cd_cf ) as descrizione from dotes d where d.id_ditta = \'8\' and d.datadoc  = \'$id\' and d.cd_do = \'OVE\'');

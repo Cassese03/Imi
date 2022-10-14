@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imi/page/login.dart';
@@ -85,8 +83,6 @@ class _SincronizzaPageState extends State<SincronizzaPage> {
         'xconfezione': cart.confezione.toString(),
       }),
     );
-    print(response.body);
-    print(response.statusCode);
     if (response.statusCode == 200) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.

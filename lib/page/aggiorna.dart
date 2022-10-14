@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:imi/model/sc.dart';
 import 'package:imi/page/login.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ import 'package:imi/model/lsarticolo.dart';
 import 'package:imi/model/lsrevisione.dart';
 import 'package:imi/model/lsscaglione.dart';
 import 'package:imi/model/mggiac.dart';
+import 'package:imi/model/agente.dart';
 import 'package:imi/model/imi.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:imi/page/agente.dart';
@@ -68,6 +70,23 @@ class _AggiornaPageState extends State<AggiornaPage> {
       var notesJson = json.decode(response.body);
       for (var noteJson in notesJson) {
         notes.add(AR.fromJson(noteJson));
+      }
+    }
+    return notes;
+  }
+
+
+  Future<List<SC>> get_sc() async {
+    var url = 'https://bohagent.cloud/api/b2b/get_provvisiero/sc/IMI1234';
+
+    var response = await http.get(Uri.parse(url));
+
+    var notes = <SC>[];
+
+    if (response.statusCode == 200) {
+      var notesJson = json.decode(response.body);
+      for (var noteJson in notesJson) {
+        notes.add(SC.fromJson(noteJson));
       }
     }
     return notes;
@@ -231,6 +250,25 @@ class _AggiornaPageState extends State<AggiornaPage> {
     return notes;
   }
 
+
+  Future<List<Agente>> get_agente(String last_agente) async {
+    print('https://bohagent.cloud/api/b2b/get_imi/agente/IMI1234/$last_agente');
+    var url =
+        'https://bohagent.cloud/api/b2b/get_imi/agente/IMI1234/$last_agente';
+
+    var response = await http.get(Uri.parse(url));
+
+    var notes = <Agente>[];
+
+    if (response.statusCode == 200) {
+      var notesJson = json.decode(response.body);
+      for (var noteJson in notesJson) {
+        notes.add(Agente.fromJson(noteJson));
+      }
+    }
+    return notes;
+  }
+
   Future<List<DOTotali>> get_dototali(String last_dotes) async {
     print(
         'https://bohagent.cloud/api/b2b/get_imi/dototali/IMI1234/$last_dotes');
@@ -263,10 +301,42 @@ class _AggiornaPageState extends State<AggiornaPage> {
       print('Start');
       var d1b = await ProvDatabase.instance.database;
 
-      List last_ar = await d1b.rawQuery(
-          'SELECT Max(id_ar) as last_ar from ar where id_ditta = \'8\'');
+      String last_agente1 = '';
+      List last_agente = await d1b.rawQuery(
+          'SELECT Max(id) as last_agente from agente ');
+      if (last_agente[0]["last_agente"] == null)
+        last_agente1 = '1';
+      else
+        last_agente1 =
+            last_agente[0]["last_ar"].toString();
 
-      await get_ar(last_ar[0]["last_ar"]).then((value) async {
+      await get_agente(last_agente1).then((value) async {
+        //await ProvDatabase.instance.deleteallAgente();
+
+        for (int i = 0; i < value.length; i++) {
+          await ProvDatabase.instance.addAgente(
+              '8'.toString(),
+              value[i].cd_agente.toString(),
+              value[i].descrizione.toString(),
+              value[i].provvigione.toString(),
+              value[i].sconto.toString(),
+              value[i].xpassword.toString());
+          print('Agente Inserito correttamente $i');
+        }
+      });
+
+      List last_ar = await d1b.rawQuery(
+          'SELECT Max(id_ar) as last_ar from ar where ');
+
+      String last_ar_1 = '0';
+
+      if (last_ar[0]["last_ar"] == null)
+        last_ar_1 = '0';
+      else
+        last_ar_1 = last_ar[0]["last_ar"];
+
+
+      await get_ar(last_ar_1).then((value) async {
         for (int i = 0; i < value.length; i++) {
           await ProvDatabase.instance.addAR(
               value[i].cd_AR,
@@ -358,6 +428,25 @@ class _AggiornaPageState extends State<AggiornaPage> {
         }
       });
 
+      await get_sc().then((value) async {
+        await ProvDatabase.instance.deleteallSC();
+
+        for (int i = 0; i < value.length; i++) {
+          await ProvDatabase.instance.addSC(
+            "8",
+            value[i].cd_cf.toString(),
+            value[i].datascadenza.toString(),
+            value[i].importoe.toString(),
+            value[i].numfattura.toString(),
+            value[i].datafattura.toString(),
+            value[i].datapagamento.toString(),
+            value[i].pagata.toString(),
+            value[i].insoluta.toString(),
+          );
+          print('Scadenza Inserita correttamente $i');
+        }
+      });
+
       await get_lsscaglione().then((value) async {
         await ProvDatabase.instance.deleteallLSScaglione();
 
@@ -373,14 +462,14 @@ class _AggiornaPageState extends State<AggiornaPage> {
 
       String last_dotes_1 = '0';
       List last_dotes = await d1b.rawQuery(
-          'SELECT Max(id_dorig) as last_dotes from dorig where id_ditta = \'8\'');
+          'SELECT Max(id_dotes) as last_dotes from dotes where ');
       if (last_dotes[0]["last_dotes"] == null)
         last_dotes_1 = '0';
       else
         last_dotes_1 = last_dotes[0]["last_dotes"];
 
       await get_dotes(last_dotes_1).then((value) async {
-        await ProvDatabase.instance.deleteallDOTes();
+       // await ProvDatabase.instance.deleteallDOTes();
 
         for (int i = 0; i < value.length; i++) {
           await ProvDatabase.instance.addDOTes(
@@ -400,11 +489,16 @@ class _AggiornaPageState extends State<AggiornaPage> {
         }
       });
 
-      List last_dorig = await d1b.rawQuery(
-          'SELECT Max(id_dorig) as last_dorig from dorig where id_ditta = \'8\'');
+      String last_dorig_1 = '0';
+      List last_dorig= await d1b.rawQuery(
+          'SELECT Max(id_dorig) as last_dorig from dorig');
+      if (last_dorig[0]["last_dorig"] == null)
+        last_dorig_1 = '0';
+      else
+        last_dorig_1 = last_dorig[0]["last_dorig"];
 
-      await get_dorig(last_dorig[0]["last_dorig"]).then((value) async {
-        await ProvDatabase.instance.deleteallDORig();
+      await get_dorig(last_dorig_1).then((value) async {
+       // await ProvDatabase.instance.deleteallDORig();
 
         for (int i = 0; i < value.length; i++) {
           await ProvDatabase.instance.addDorig(
@@ -423,8 +517,8 @@ class _AggiornaPageState extends State<AggiornaPage> {
           print('DORig Inserito correttamente $i');
         }
       });
-      await get_dototali(last_dotes[0]["last_dotes"]).then((value) async {
-        await ProvDatabase.instance.deleteallDOTotali();
+      await get_dototali(last_dotes_1).then((value) async {
+        //await ProvDatabase.instance.deleteallDOTotali();
 
         for (int i = 0; i < value.length; i++) {
           await ProvDatabase.instance.addDOTotali(
@@ -439,7 +533,7 @@ class _AggiornaPageState extends State<AggiornaPage> {
 
       String last_dotes_prov1 = '';
       List last_dotes_prov = await d1b.rawQuery(
-          'SELECT Max(id_dotes) as last_dotes from dotes_prov where id_ditta = \'8\'');
+          'SELECT Max(id_dotes) as last_dotes from dotes_prov where ');
       if (last_dotes_prov[0]["last_dotes"] == null)
         last_dotes_prov1 = '1';
       else

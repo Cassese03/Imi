@@ -264,16 +264,7 @@ class _OrdiniPageState extends State<OrdiniPage> {
                                             for (int i = 0;
                                                 i < value.length;
                                                 i++) {
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        SincronizzaPage(
-                                                      agente: widget.agente
-                                                          .toString(),
-                                                      cart: [value[i]],
-                                                    ),
-                                                  ));
+                                              await sendCart(value[i]);
                                             }
 
                                             showDialog(
